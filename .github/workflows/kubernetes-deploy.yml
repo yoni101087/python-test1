@@ -1,0 +1,112 @@
+name: Manual trigger
+
+on:
+  workflow_dispatch:
+
+
+#name: Kubernetes Deployment Workflow
+
+#on:
+#  push:
+#    branches:
+#      - main
+
+jobs:
+
+  deploy-app:
+    runs-on: self-hosted   # Specify the runner label for your self-hosted runner
+
+
+    env:
+      APPLICATION: python-test1
+      NAMESPACE: default
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+          
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build the Docker Image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest .
+        
+
+      - name: Push the Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest
+
+      - name: Log in to ArgoCD
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+        run: argocd login $ARGOCD_SERVER --insecure --username admin --password $ARGOCD_TOKEN
+
+      - name: Add Repository to ArgoCD
+        env:
+          REPO_URL: git@github.com:yoni101087/python-test1.git
+        run: |
+          argocd repo add $REPO_URL \
+            --name python-test1 \
+            --insecure-ignore-host-key \
+            --ssh-private-key-path ~/.ssh/id_rsa
+            
+
+      - name: Deploy Application using ArgoCD
+        env:
+          REPO_PATH: ./charts  # Change this to your application's path
+          APP_NAMESPACE: default
+          IMAGE_TAG: latest  # You can set this to your desired tag
+        run: |
+          argocd app create python-test1 \
+            --repo https://github.com/yoni101087/python-test1.git \
+            --path $REPO_PATH \
+            --dest-server https://kubernetes.default.svc \
+            --dest-namespace default \
+            --revision main  # Change this to your desired branch or revision
+
+#          argocd app set python-test1 \
+#            --values image.tag=$IMAGE_TAG
+
+      - name: Trigger Synchronization
+        run: |
+          argocd app sync python-test1
+
+  test-app:
+    needs: deploy-app
+    runs-on: self-hosted   # Specify the runner label for your self-hosted runner
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+#      - name: Run Tests
+#        # Add steps to run tests against your application endpoints
+#        run: |
+#          # Example: Run tests using a test framework or curl commands
+#          curl http://app.local/healthcheck
+
+  save-artifact:
+    needs: test-app
+    runs-on: self-hosted
+    steps:
+      - name: Package Helm chart
+        run: |
+          helm package ./charts
+
+      - name: Upload Helm chart artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-release-${{ github.sha }}
+          path: ./python-test1-0.1.0.tgz
+          
+
+
+      - name: Upload artifact to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: 'http://nexus.yonif.net'  # Replace with your Nexus URL
+          NEXUS_REPOSITORY: 'python-test1'  # Replace with the repository ID in Nexus
+        run: |
+          curl -v -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file ./python-test1-0.1.0.tgz $NEXUS_URL/repository/$NEXUS_REPOSITORY/my-release/${{ github.sha }}/my-release-${{ github.sha }}.tgz
+
