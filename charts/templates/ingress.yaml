@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: python-test1.local
+    - host: python-test.local
       http:
         paths:
           - path: /

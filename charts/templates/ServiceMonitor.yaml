@@ -2,10 +2,10 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: python-test1
+    app: python-test
     release: prometheus
-    name: python-test1
-  name: python-test1
+    name: python-test
+  name: python-test
   namespace: monitoring
 spec:
   endpoints:
@@ -15,4 +15,4 @@ spec:
     - default
   selector:
     matchLabels:
-      app: python-test1
+      app: python-test

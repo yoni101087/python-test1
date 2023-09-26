@@ -18,7 +18,7 @@ jobs:
 
 
     env:
-      APPLICATION: python-test1
+      APPLICATION: python-test
       NAMESPACE: default
 
     steps:
@@ -30,11 +30,11 @@ jobs:
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Build the Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest . --nocache
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-test:latest . --nocache
         
 
       - name: Push the Docker Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-test:latest
 
       - name: Log in to ArgoCD
         env:
@@ -47,7 +47,7 @@ jobs:
           REPO_URL: git@github.com:yoni101087/python-test1.git
         run: |
           argocd repo add $REPO_URL \
-            --name python-test1 \
+            --name python-test \
             --insecure-ignore-host-key \
             --ssh-private-key-path ~/.ssh/id_rsa
             
@@ -58,19 +58,19 @@ jobs:
           APP_NAMESPACE: default
           IMAGE_TAG: latest  # You can set this to your desired tag
         run: |
-          argocd app create python-test1 \
+          argocd app create python-test \
             --repo https://github.com/yoni101087/python-test1.git \
             --path $REPO_PATH \
             --dest-server https://kubernetes.default.svc \
             --dest-namespace default \
             --revision main  # Change this to your desired branch or revision
 
-#          argocd app set python-test1 \
+#          argocd app set python-test \
 #            --values image.tag=$IMAGE_TAG
 
       - name: Trigger Synchronization
         run: |
-          argocd app sync python-test1
+          argocd app sync python-test
 
   test-app:
     needs: deploy-app
@@ -97,7 +97,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: my-release-${{ github.sha }}
-          path: ./python-test1-0.1.0.tgz
+          path: ./python-test-0.1.0.tgz
           
 
 
@@ -106,7 +106,7 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: 'http://nexus.yonif.net'  # Replace with your Nexus URL
-          NEXUS_REPOSITORY: 'python-test1'  # Replace with the repository ID in Nexus
+          NEXUS_REPOSITORY: 'python-test'  # Replace with the repository ID in Nexus
         run: |
-          curl -v -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file ./python-test1-0.1.0.tgz $NEXUS_URL/repository/$NEXUS_REPOSITORY/my-release/${{ github.sha }}/my-release-${{ github.sha }}.tgz
+          curl -v -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file ./python-test-0.1.0.tgz $NEXUS_URL/repository/$NEXUS_REPOSITORY/my-release/${{ github.sha }}/my-release-${{ github.sha }}.tgz
 
