@@ -7,7 +7,8 @@ spec:
     app: {{ include "name" . }}
     release: {{ .Release.Name }}
   ports:
+  
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 9086
+      targetPort: 9086
   type: {{ .Values.service.type }}

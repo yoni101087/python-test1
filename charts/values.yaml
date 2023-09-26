@@ -6,21 +6,10 @@ image:
 
 service:
   type: ClusterIP
-  port: 9083
+  port: 9086
 
 
 ingress:
   enabled: true
   annotations: {}
-
-argocdApplication:
-  name: python-test1
-  project: default
-  source:
-    repoURL: https://github.com/yoni101087/python-test1.git
-    targetRevision: main
-    path: ./charts
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
 
