@@ -13,7 +13,7 @@ def process_request():
 
 if __name__ == '__main__':
     # Start the Prometheus HTTP server to expose metrics
-    start_http_server(8000)
+    start_http_server(9086)
 
     while True:
         process_request()
