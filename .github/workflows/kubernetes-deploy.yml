@@ -30,7 +30,7 @@ jobs:
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Build the Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-test1:latest . --nocache
         
 
       - name: Push the Docker Image
