@@ -44,7 +44,7 @@ jobs:
 
       - name: Add Repository to ArgoCD
         env:
-          REPO_URL: git@github.com:yoni101087/python-test1.git
+          REPO_URL: git@github.com:yoni101087/python-test.git
         run: |
           argocd repo add $REPO_URL \
             --name python-test \
@@ -59,7 +59,7 @@ jobs:
           IMAGE_TAG: latest  # You can set this to your desired tag
         run: |
           argocd app create python-test \
-            --repo https://github.com/yoni101087/python-test1.git \
+            --repo https://github.com/yoni101087/python-test.git \
             --path $REPO_PATH \
             --dest-server https://kubernetes.default.svc \
             --dest-namespace default \

@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: yoni101087/python-test1
+  repository: yoni101087/python-test
   tag: latest
   pullPolicy: IfNotPresent
 
