@@ -14,7 +14,7 @@ WORKDIR /app
 COPY app.py /app/
 
 # Expose the port that Prometheus will scrape metrics from
-EXPOSE 8000
+EXPOSE 9086
 
 # Run the Python script
 CMD ["python", "app.py"]
