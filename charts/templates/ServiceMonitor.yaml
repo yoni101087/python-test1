@@ -7,10 +7,13 @@ metadata:
   namespace: monitoring
 spec:
   endpoints:
-  - port: "9086"
+  - port: http
   namespaceSelector:
     matchNames:
     - default
   selector:
     matchLabels:
       app: python-test
+
+
+

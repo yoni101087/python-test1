@@ -4,13 +4,14 @@ metadata:
   name: {{ include "name" . }}
   labels:
     name: {{ include "name" . }}
+    app: {{ include "name" . }}
 spec:
   selector:
     app: {{ include "name" . }}
     release: {{ .Release.Name }}
   ports:
   
-    - protocol: TCP
-      port: 9086
+    - name: http
+      port: 80
       targetPort: 9086
   type: {{ .Values.service.type }}
