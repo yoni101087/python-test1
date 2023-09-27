@@ -13,4 +13,4 @@ spec:
     - default
   selector:
     matchLabels:
-      name: python-test
+      app: python-test
